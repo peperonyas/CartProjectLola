@@ -1,0 +1,40 @@
+version: '3.2'
+services:
+  cart-api:
+    build:       
+      context: ./
+      dockerfile: Cart.Api/Dockerfile
+    container_name: cart-api
+    restart: unless-stopped
+    ports:
+      - 81:80
+      - 82:433
+    depends_on:
+      - "cartdb"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+      - LC_ALL=en_US.UTF-8 
+      - LANG=en_US.UTF-8
+    networks:
+    - local
+  cartdb:
+    image: postgres:alpine
+    container_name: cartdb
+    restart: unless-stopped
+    volumes:
+      - postgres:/var/lib/postgresql/cartdbdata
+      - ./docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
+    environment:
+      - POSTGRES_USER=CartAdmin
+      - POSTGRES_PASSWORD=MySuperSecurePassword
+      - POSTGRES_DB=CartDb
+    ports:
+      - 5433:5432
+    networks:
+    - local
+networks:
+  local:
+    driver: bridge
+volumes:
+  postgres:
