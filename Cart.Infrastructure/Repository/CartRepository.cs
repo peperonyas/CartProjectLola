@@ -15,15 +15,10 @@ namespace Cart.Infrastructure.Repository
         }
         public async Task<bool> CheckQuantity(AddRequestModel parameters)
         {
-            string query = $" IF EXISTS(SELECT 1 FROM Products WHERE ProductId = {parameters.ProductId} and Quantity >= {parameters.Quantity}) THEN " +
-                $" INSERT INTO Cart(ProductId, Quantity) VALUES({parameters.ProductId}, {parameters.Quantity}); " +
-                $" SELECT  1;      " +
-                $" END IF; " +
-                $" SELECT 0; ";
             using (var connection = CreateConnection())
             {
-                return await connection.ExecuteAsync(query) == 1 ? true : false;
-                //return await connection.ExecuteScalarAsync<bool>("CheckQuantityAndInsert", new { parameters.ProductId, parameters.Quantity });
+                return await connection.ExecuteScalarAsync<bool>("checkquantityandinsert", new { id = parameters.ProductId, cnt =parameters.Quantity }, 
+                    commandType:CommandType.StoredProcedure);
             }
         }
         protected IDbConnection CreateConnection()
